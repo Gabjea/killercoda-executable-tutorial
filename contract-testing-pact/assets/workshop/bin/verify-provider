@@ -5,6 +5,7 @@
 # Starts that version of UserService with provider states enabled,
 # then runs the Pact verifier against it.
 set -euo pipefail
+wait-for-setup
 VERSION=${1:?usage: verify-provider <version> <pact-file>}
 PACT_FILE=$(realpath "${2:?usage: verify-provider <version> <pact-file>}")
 

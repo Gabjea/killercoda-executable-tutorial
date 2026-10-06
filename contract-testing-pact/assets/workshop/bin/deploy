@@ -3,6 +3,7 @@
 # Deploying = pushing a commit to the "production" remote's main branch.
 # The remote's post-receive hook then rolls it out.
 set -euo pipefail
+wait-for-setup
 svc=${1:?usage: deploy <user-service|order-service> [ref]}
 ref=${2:-HEAD}
 cd "/root/workshop/$svc"

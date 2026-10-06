@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Blocks until the environment setup (setup/background.sh) has finished.
+# Prints nothing if setup is already done.
+if [ ! -f /tmp/.setup-done ] && [ ! -f /tmp/.setup-failed ]; then
+  echo -n "The environment is still being set up (about 2 minutes), please wait"
+  while [ ! -f /tmp/.setup-done ] && [ ! -f /tmp/.setup-failed ]; do sleep 2; echo -n "."; done
+  echo
+fi
+if [ -f /tmp/.setup-failed ]; then
+  echo "Setup failed. Details: /var/log/workshop-setup.log" >&2
+  exit 1
+fi
