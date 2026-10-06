@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Usage: run-tests <service-directory> [extra pytest args]
+set -euo pipefail
+dir=$(realpath "${1:?usage: run-tests <service-directory>}"); shift
+exec docker run --rm -v "$dir":/app -w /app workshop-dev pytest -q -p no:cacheprovider "$@"

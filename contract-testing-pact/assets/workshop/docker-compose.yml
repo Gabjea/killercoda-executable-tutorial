@@ -1,4 +1,3 @@
-# The Pact Broker and its database.
 name: workshop
 
 services:
@@ -24,6 +23,18 @@ services:
     environment:
       PACT_BROKER_DATABASE_URL: postgres://pact:pact@postgres/pact
       PACT_BROKER_LOG_LEVEL: WARN
+
+  user-service:
+    image: user-service:${USER_SERVICE_VERSION}
+    pull_policy: never
+
+  order-service:
+    image: order-service:${ORDER_SERVICE_VERSION}
+    pull_policy: never
+    environment:
+      USER_SERVICE_URL: http://user-service:5000
+    ports:
+      - "8080:5000"
 
 networks:
   default:
