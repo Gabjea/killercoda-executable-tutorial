@@ -4,7 +4,7 @@ At the end of step 3, the provider needed a file from the consumer's repository.
 **Pact Broker** removes that dependency: it's a server that both teams talk to, instead
 of talking to each other.
 
-![The contract-testing workflow through the Pact Broker](./contract-workflow.svg)
+![The contract-testing workflow through the Pact Broker](../images/contract-workflow.svg)
 
 1. The consumer team **publishes** its contract to the broker.
 2. The provider team **fetches** the contracts it must fulfil.
