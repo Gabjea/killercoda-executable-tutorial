@@ -1,0 +1,28 @@
+{
+  "title": "Contract Testing with Pact and the Pact Broker",
+  "description": "Catch breaking API changes between microservices with consumer-driven contracts, and use can-i-deploy to release a field rename safely.",
+  "details": {
+    "intro": {
+      "text": "intro.md",
+      "background": "setup/background.sh",
+      "foreground": "setup/foreground.sh"
+    },
+    "steps": [
+      {
+        "title": "Infrastructure check (temporary)",
+        "text": "step-check/text.md"
+      }
+    ],
+    "finish": {
+      "text": "finish.md"
+    },
+    "assets": {
+      "host01": [
+        { "file": "**/*", "target": "/opt/workshop-assets" }
+      ]
+    }
+  },
+  "backend": {
+    "imageid": "ubuntu"
+  }
+}
