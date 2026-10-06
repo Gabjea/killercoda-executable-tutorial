@@ -29,3 +29,21 @@ Temporary step for us authors.
 **7. pact-python is installed**
 
 `docker run --rm workshop-dev pip show pact-python`{{exec}}
+
+**8. User-service history: three tagged versions, production at 1.0.0**
+
+`git -C user-service log --oneline --decorate`{{exec}}
+
+**9. Deploying 2.0.0 breaks the order service** (expect a 500)
+
+`deploy user-service 2.0.0`{{exec}}
+
+`curl -s localhost:8080/orders/1001; echo`{{exec}}
+
+`docker compose logs order-service | tail -5`{{exec}}
+
+**10. Rolling back fixes it**
+
+`deploy user-service 1.0.0 && curl -s localhost:8080/orders/1001; echo`{{exec}}
+
+`cat .env`{{exec}}

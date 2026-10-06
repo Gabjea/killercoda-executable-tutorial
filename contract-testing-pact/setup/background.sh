@@ -14,6 +14,7 @@ echo "== Installing workshop files"
 mkdir -p "$W"
 cp -r "$ASSETS/workshop/." "$W/"
 install -m 0755 "$W"/bin/* /usr/local/bin/
+chmod +x "$W"/server-hooks/*
 echo 'cd /root/workshop' >> /root/.bashrc
 
 git config --global user.name  "Workshop Learner"
@@ -41,11 +42,12 @@ for p in "${pids[@]}"; do wait "$p"; done
 echo "== Building dev image (pytest + pact-python)"
 docker build -q -t workshop-dev "$W/dev"
 
-# make_repo <service> <pacticipant> <versions...>
-# Builds a Git history with one commit + tag per version, and an image per version.
+# make_repo <service> <pacticipant> <env var> <versions...>
+# Builds a Git history with one commit + tag per version, builds an image per version,
+# and creates a bare "production" remote whose main branch starts at the first version.
 make_repo() {
-  local svc=$1 pacticipant=$2; shift 2
-  local repo=$W/$svc
+  local svc=$1 pacticipant=$2 envvar=$3; shift 3
+  local repo=$W/$svc bare=/srv/git/$svc.git first=$1
   git init -q "$repo"
   for v in "$@"; do
     cp -r "$ASSETS/src/$svc/$v/." "$repo/"
@@ -55,11 +57,21 @@ make_repo() {
     git -C "$repo" archive "$v" | docker build -q -t "$svc:$v" -
   done
   git -C "$repo" config pact.pacticipant "$pacticipant"
+
+  mkdir -p /srv/git
+  git init -q --bare "$bare"
+  git -C "$repo" remote add production "$bare"
+  git -C "$repo" push -q production "$(git -C "$repo" rev-parse "$first"):refs/heads/main"
+  git -C "$bare" config workshop.service "$svc"
+  git -C "$bare" config workshop.envvar "$envvar"
+  git -C "$bare" config pact.pacticipant "$pacticipant"
+  # Installed after the initial push, so that push doesn't count as a deployment
+  cp "$W/server-hooks/post-receive" "$bare/hooks/post-receive"
 }
 
 echo "== Creating repositories and building service images"
-make_repo user-service  UserService  1.0.0
-make_repo order-service OrderService 1.0.0
+make_repo user-service  UserService  USER_SERVICE_VERSION  1.0.0 1.1.0 2.0.0
+make_repo order-service OrderService ORDER_SERVICE_VERSION 1.0.0
 
 echo "== Starting production stack"
 cat > "$W/.env" <<ENV

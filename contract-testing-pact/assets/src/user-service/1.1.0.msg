@@ -1,0 +1,1 @@
+Add full_name field (name kept for existing clients)

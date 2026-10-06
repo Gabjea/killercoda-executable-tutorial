@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Usage: deploy <user-service|order-service> [git ref, default HEAD]
+# Deploying = pushing a commit to the "production" remote's main branch.
+# The remote's post-receive hook then rolls it out.
+set -euo pipefail
+svc=${1:?usage: deploy <user-service|order-service> [ref]}
+ref=${2:-HEAD}
+cd "/root/workshop/$svc"
+sha=$(git rev-parse --verify "$ref^{commit}")
+echo "Deploying $svc $(git show "$sha:VERSION" | tr -d '[:space:]') ($ref)"
+git push --force production "$sha:refs/heads/main"

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Runs inside the bare "production" repo after a push: rolls out the pushed version
+# and records the deployment in the Pact Broker (if the broker knows that version).
+set -uo pipefail
+SERVICE=$(git config --get workshop.service)
+ENVVAR=$(git config --get workshop.envvar)
+PACTICIPANT=$(git config --get pact.pacticipant)
+W=/root/workshop
+
+while read -r old new ref; do
+  [ "$ref" = refs/heads/main ] || continue
+  VERSION=$(git show "$new:VERSION" | tr -d '[:space:]')
+  echo "Rolling out $SERVICE $VERSION"
+  git archive "$new" | docker build -q -t "$SERVICE:$VERSION" - >/dev/null || { echo "Build failed"; exit 1; }
+  sed -i "s/^$ENVVAR=.*/$ENVVAR=$VERSION/" "$W/.env"
+  docker compose -f "$W/docker-compose.yml" up -d --no-deps "$SERVICE" 2>&1 | grep -v '^$' | sed 's/^/  /'
+  for i in $(seq 1 20); do
+    docker compose -f "$W/docker-compose.yml" exec -T "$SERVICE" \
+      python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')" >/dev/null 2>&1 && break
+    sleep 1
+  done
+
+  if pact-broker describe-version --pacticipant "$PACTICIPANT" --version "$VERSION" >/dev/null 2>&1; then
+    pact-broker record-deployment --pacticipant "$PACTICIPANT" --version "$VERSION" --environment production
+  else
+    echo "Note: the Pact Broker doesn't know $PACTICIPANT $VERSION, so this deployment was not recorded."
+  fi
+  echo "$SERVICE $VERSION is live."
+done
