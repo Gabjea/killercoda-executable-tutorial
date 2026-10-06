@@ -12,6 +12,11 @@
         "title": "The breaking change",
         "text": "step1/text.md",
         "verify": "step1/verify.sh"
+      },
+      {
+        "title": "Write a consumer contract",
+        "text": "step2/text.md",
+        "verify": "step2/verify.sh"
       }
     ],
     "finish": {
