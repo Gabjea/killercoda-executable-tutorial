@@ -27,7 +27,7 @@ git config --global advice.detachedHead false
 echo "== Installing Docker Compose plugin (not preinstalled on this image)"
 if ! docker compose version >/dev/null 2>&1; then
   mkdir -p /usr/local/lib/docker/cli-plugins
-  curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m)" \
+  curl -fsSL "https://github.com/docker/compose/releases/download/v5.6.0/docker-compose-linux-$(uname -m)" \
     -o /usr/local/lib/docker/cli-plugins/docker-compose
   chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 fi
@@ -35,8 +35,12 @@ docker compose version
 
 echo "== Pulling images (in parallel)"
 pids=()
-for img in postgres:16-alpine pactfoundation/pact-broker:latest pactfoundation/pact-cli:latest \
-           pactfoundation/pact-ref-verifier:latest python:3.12-slim; do
+for img in \
+  postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea \
+  pactfoundation/pact-broker@sha256:420341d4fbfb00a621c313f47e530ad75703f969bbc7520d0d72bc71bb53cef9 \
+  pactfoundation/pact-cli@sha256:72f1df83a7c42abd02e69a0fa21c3adc037d72c2852daa9f2910bb35617b207b \
+  pactfoundation/pact-ref-verifier@sha256:514b680cd0ad2fa95c6df7a541e3b03c8dd1176de26e84e58a349de96e305bce \
+  python:3.12-slim@sha256:05cda9777409a9c3ffddd94a4c476b79f0769a0b4857f0c7ed9226b6800b0d6f; do
   docker pull -q "$img" & pids+=($!)
 done
 for p in "${pids[@]}"; do wait "$p"; done

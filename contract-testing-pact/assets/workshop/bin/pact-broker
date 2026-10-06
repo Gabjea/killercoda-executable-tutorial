@@ -2,4 +2,4 @@
 exec docker run --rm --network host \
   -e PACT_BROKER_BASE_URL="${PACT_BROKER_BASE_URL:-http://localhost:9292}" \
   -v /root/workshop:/root/workshop -w "$(pwd)" \
-  pactfoundation/pact-cli:latest broker "$@"
+  pactfoundation/pact-cli@sha256:72f1df83a7c42abd02e69a0fa21c3adc037d72c2852daa9f2910bb35617b207b broker "$@"

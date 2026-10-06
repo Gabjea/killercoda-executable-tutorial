@@ -2,7 +2,7 @@ name: workshop
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
     environment:
       POSTGRES_USER: pact
       POSTGRES_PASSWORD: pact
@@ -13,7 +13,7 @@ services:
       retries: 30
 
   broker:
-    image: pactfoundation/pact-broker:latest
+    image: pactfoundation/pact-broker@sha256:420341d4fbfb00a621c313f47e530ad75703f969bbc7520d0d72bc71bb53cef9
     depends_on:
       postgres:
         condition: service_healthy

@@ -40,13 +40,13 @@ if [ -n "$PACT_FILE" ]; then
   echo "Verifying UserService $VERSION against $(basename "$PACT_FILE")"
   docker run --rm --network workshop -e PACT_DO_NOT_TRACK=true \
     -v "$PACT_FILE":/pact.json:ro \
-    pactfoundation/pact-ref-verifier:latest "${ARGS[@]}" --file /pact.json
+    pactfoundation/pact-ref-verifier@sha256:514b680cd0ad2fa95c6df7a541e3b03c8dd1176de26e84e58a349de96e305bce "${ARGS[@]}" --file /pact.json
 else
   echo "Verifying UserService $VERSION against contracts from the Pact Broker"
   # Which contracts to verify: the latest one from each OrderService branch.
   # (The "use-full-name" branch is created in step 5.)
   docker run --rm --network workshop -e PACT_DO_NOT_TRACK=true \
-    pactfoundation/pact-ref-verifier:latest "${ARGS[@]}" \
+    pactfoundation/pact-ref-verifier@sha256:514b680cd0ad2fa95c6df7a541e3b03c8dd1176de26e84e58a349de96e305bce "${ARGS[@]}" \
     --broker-url http://broker:9292 \
     --consumer-version-selectors '{"branch": "main"}' \
     --consumer-version-selectors '{"branch": "use-full-name"}' \
