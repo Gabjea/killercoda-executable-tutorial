@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
-# Verify a version of UserService against a contract (pact file).
-# Usage: verify-provider <version> <pact-file>
+# Verify a version of UserService against its consumers' contracts.
 #
-# Starts that version of UserService with provider states enabled,
-# then runs the Pact verifier against it.
+#   verify-provider <version> <pact-file>   check against a local pact file, publish nothing
+#   verify-provider <version>               fetch contracts from the Pact Broker,
+#                                           and publish the results there
 set -euo pipefail
 wait-for-setup
-VERSION=${1:?usage: verify-provider <version> <pact-file>}
-PACT_FILE=$(realpath "${2:?usage: verify-provider <version> <pact-file>}")
+VERSION=${1:?usage: verify-provider <version> [pact-file]}
+PACT_FILE=""
+if [ -n "${2:-}" ]; then
+  PACT_FILE=$(realpath "$2")
+fi
 
 IMAGE=user-service:$VERSION
 NAME=user-service-verify
@@ -29,11 +32,23 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
-echo "Verifying UserService $VERSION against $(basename "$PACT_FILE")"
-docker run --rm --network workshop -v "$PACT_FILE":/pact.json:ro \
-  -e PACT_DO_NOT_TRACK=true \
-  pactfoundation/pact-ref-verifier:latest \
-  --file /pact.json \
-  --hostname "$NAME" --port 5000 \
-  --provider-name UserService \
-  --state-change-url "http://$NAME:5000/_pact/provider-states"
+ARGS=(--hostname "$NAME" --port 5000
+      --provider-name UserService
+      --state-change-url "http://$NAME:5000/_pact/provider-states")
+
+if [ -n "$PACT_FILE" ]; then
+  echo "Verifying UserService $VERSION against $(basename "$PACT_FILE")"
+  docker run --rm --network workshop -e PACT_DO_NOT_TRACK=true \
+    -v "$PACT_FILE":/pact.json:ro \
+    pactfoundation/pact-ref-verifier:latest "${ARGS[@]}" --file /pact.json
+else
+  echo "Verifying UserService $VERSION against contracts from the Pact Broker"
+  # Which contracts to verify: the latest one from each OrderService branch.
+  # (The "use-full-name" branch is created in step 5.)
+  docker run --rm --network workshop -e PACT_DO_NOT_TRACK=true \
+    pactfoundation/pact-ref-verifier:latest "${ARGS[@]}" \
+    --broker-url http://broker:9292 \
+    --consumer-version-selectors '{"branch": "main"}' \
+    --consumer-version-selectors '{"branch": "use-full-name"}' \
+    --publish --provider-version "$VERSION" --provider-branch main
+fi
