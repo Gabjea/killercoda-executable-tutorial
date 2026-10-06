@@ -34,7 +34,7 @@ docker compose version
 echo "== Pulling images (in parallel)"
 pids=()
 for img in postgres:16-alpine pactfoundation/pact-broker:latest pactfoundation/pact-cli:latest \
-           python:3.12-slim; do
+           pactfoundation/pact-ref-verifier:latest python:3.12-slim; do
   docker pull -q "$img" & pids+=($!)
 done
 for p in "${pids[@]}"; do wait "$p"; done
