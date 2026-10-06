@@ -27,6 +27,11 @@
         "title": "Share contracts through the Pact Broker",
         "text": "step4/text.md",
         "verify": "step4/verify.sh"
+      },
+        {
+        "title": "The compatibility matrix",
+        "text": "step5/text.md",
+        "verify": "step5/verify.sh"
       }
     ],
     "finish": {

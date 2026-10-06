@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Show which OrderService and UserService versions work together,
+# according to the verification results stored in the Pact Broker.
+set -euo pipefail
+wait-for-setup
+curl -sfg -H "Accept: application/hal+json" \
+  "${PACT_BROKER_BASE_URL:-http://localhost:9292}/matrix?q[][pacticipant]=OrderService&q[][pacticipant]=UserService" |
+python3 -c '
+import json, sys
+
+def key(version):
+    return tuple(int(part) for part in version.split("."))
+
+results, consumers, providers = {}, set(), set()
+for row in json.load(sys.stdin)["matrix"]:
+    consumer = row["consumer"]["version"]["number"]
+    consumers.add(consumer)
+    provider = (row.get("provider") or {}).get("version")
+    verification = row.get("verificationResult")
+    if provider and verification:
+        providers.add(provider["number"])
+        results[(consumer, provider["number"])] = verification["success"]
+
+providers = sorted(providers, key=key)
+print()
+print(" " * 22 + "UserService")
+print("OrderService" + " " * 10 + "".join(f"{p:<10}" for p in providers))
+for c in sorted(consumers, key=key):
+    cells = []
+    for p in providers:
+        r = results.get((c, p))
+        label = "ok" if r else ("FAIL" if r is False else "-")
+        cells.append(f"{label:<10}")
+    print(f"  {c:<20}" + "".join(cells))
+print()
+print("ok = verified compatible   FAIL = verification failed   - = not verified")
+'
