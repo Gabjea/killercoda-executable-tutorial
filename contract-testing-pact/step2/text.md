@@ -61,7 +61,7 @@ OrderService reads `id` and `name`. It never touches `email`.
 
 ### 2. Describe the response body
 
-In `test_get_existing_user`, replace the `{}` in the `.with_body(...)` line with those
+In `test_get_existing_user`, replace the {{}} in the `.with_body(...)` line with those
 fields. Don't write fixed values; use **matchers**:
 
 ```python
