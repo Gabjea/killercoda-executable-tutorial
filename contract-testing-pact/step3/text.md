@@ -1,28 +1,26 @@
 # Verify the provider
-
+ 
 The pact file is the consumer's half of the contract. Now the **provider** team checks
 their real service against it. The **Pact verifier** reads the contract and, for each
-interaction:
-
-```
-Pact verifier                                     UserService (real code)
-  1. "Set up provider state: user 1 exists"  ───▶  prepares test data
-  2. GET /users/1                            ───▶
-                                             ◀───  200 {"id": 1, "name": "...", ...}
-  3. Compare the response with the contract:
-     is "id" an integer? Is "name" a string?
-```
+interaction, does three things:
+ 
+![How the Pact verifier checks the provider against the contract](./provider-verification.svg)
+ 
+1. It asks UserService to **set up the provider state** named in the contract, here
+   *user 1 exists*.
+2. It **replays the request** from the contract against the real UserService.
+3. It **compares the response** with the contract, using the matchers: is `id`{} an
+   integer, and is `name`{} a string?
 
 No OrderService is involved. The provider is checked on its own, against the
 consumer's written-down expectations.
-
 ## Provider states
 
 The contract says *given "user 1 exists"*. The verifier can't make that true on its own;
 only UserService knows how its data works. So UserService has a small endpoint that is
 only enabled during verification:
 
-`grep -A 25 "Provider states" user-service/app.py`{{exec}}
+`grep -A 22 "STATES_FILE =" user-service/app.py`{{exec}}
 
 The verifier calls this endpoint with the state's name before each interaction. The
 endpoint looks the state up in a file of test data:
