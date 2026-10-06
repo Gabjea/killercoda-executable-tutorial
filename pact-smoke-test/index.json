@@ -1,7 +1,0 @@
-{
-  "title": "Pact smoke test",
-  "details": {
-    "intro": { "text": "intro.md", "background": "background.sh" }
-  },
-  "backend": { "imageid": "ubuntu" }
-}
