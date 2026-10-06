@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Deployment gate: refuse to push to production unless the Pact Broker
+# confirms the version is compatible with everything already in production.
+set -euo pipefail
+remote_name=$1
+[ "$remote_name" = production ] || exit 0
+
+pacticipant=$(git config --get pact.pacticipant)
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [[ "$local_sha" =~ ^0+$ ]] && continue   # deleting a branch, nothing to check
+  version=$(git show "$local_sha:VERSION" | tr -d '[:space:]')
+  echo "Deployment gate: can $pacticipant $version be deployed to production?"
+  if ! pact-broker can-i-deploy --pacticipant "$pacticipant" --version "$version" --to-environment production; then
+    echo
+    echo "DEPLOYMENT BLOCKED: $pacticipant $version is not known to work with what is in production."
+    exit 1
+  fi
+done

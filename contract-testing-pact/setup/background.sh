@@ -16,7 +16,7 @@ echo "== Installing workshop files"
 mkdir -p "$W"
 cp -r "$ASSETS/workshop/." "$W/"
 install -m 0755 "$W"/bin/* /usr/local/bin/
-chmod +x "$W"/server-hooks/*
+chmod +x "$W"/hooks/* "$W"/server-hooks/*
 echo 'cd /root/workshop' >> /root/.bashrc
 
 git config --global user.name  "Workshop Learner"
