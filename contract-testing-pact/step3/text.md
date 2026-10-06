@@ -22,7 +22,7 @@ The contract says *given "user 1 exists"*. The verifier can't make that true on 
 only UserService knows how its data works. So UserService has a small endpoint that is
 only enabled during verification:
 
-`sed -n '/Provider states/,$p' user-service/app.py`{{exec}}
+`grep -A 25 "Provider states" user-service/app.py`{{exec}}
 
 The verifier calls this endpoint with the state's name before each interaction. The
 endpoint looks the state up in a file of test data:
