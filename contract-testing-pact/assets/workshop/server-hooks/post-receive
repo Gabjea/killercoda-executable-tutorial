@@ -26,4 +26,5 @@ while read -r old new ref; do
     echo "Note: the Pact Broker doesn't know $PACTICIPANT $VERSION, so this deployment was not recorded."
   fi
   echo "$SERVICE $VERSION is live."
+  echo "$(date -Is) $SERVICE $VERSION" >> /var/log/workshop-deployments.log
 done

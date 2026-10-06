@@ -9,8 +9,9 @@
     },
     "steps": [
       {
-        "title": "Infrastructure check (temporary)",
-        "text": "step-check/text.md"
+        "title": "The breaking change",
+        "text": "step1/text.md",
+        "verify": "step1/verify.sh"
       }
     ],
     "finish": {
