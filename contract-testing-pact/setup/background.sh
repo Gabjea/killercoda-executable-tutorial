@@ -1,4 +1,6 @@
 #!/bin/bash
+# Runs hidden while the learner reads the intro.
+# Errors are visible in the Killercoda creator debug section and in /var/log/workshop-setup.log
 set -Eeuo pipefail
 exec > >(tee -a /var/log/workshop-setup.log) 2>&1
 trap 'echo "SETUP FAILED at line $LINENO"; touch /tmp/.setup-failed' ERR

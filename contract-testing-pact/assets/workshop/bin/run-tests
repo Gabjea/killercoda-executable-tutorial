@@ -2,4 +2,5 @@
 # Usage: run-tests <service-directory> [extra pytest args]
 set -euo pipefail
 dir=$(realpath "${1:?usage: run-tests <service-directory>}"); shift
-exec docker run --rm -v "$dir":/app -w /app workshop-dev pytest -q -p no:cacheprovider "$@"
+exec docker run --rm -e PACT_DO_NOT_TRACK=true -v "$dir":/app -w /app workshop-dev \
+  pytest -q -p no:cacheprovider "$@"

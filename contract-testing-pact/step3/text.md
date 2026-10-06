@@ -37,8 +37,14 @@ This starts UserService 1.0.0 in a container with provider states enabled, and r
 Pact verifier against it.
 
 The "user that does not exist" interaction passes. The "existing user" interaction
-fails: the verifier asked for the state *user 1 exists*, and UserService answered that
-it doesn't know that state.
+fails before the request is even sent:
+
+    Provider setup state change for 'user 1 exists' has failed - ... Invalid status code: 400
+
+Before checking the interaction, the verifier asked UserService to set up the state
+*user 1 exists*. UserService looked for it in `states.json`{{}}, didn't find it, and
+answered with **400 Bad Request**. The verifier can't check an interaction whose
+precondition couldn't be set up, so it fails it.
 
 ## Your task: add the missing state
 
@@ -71,10 +77,10 @@ The name can be anything. Try something different from the contract's example, l
 
 What this does:
 
-- **Each key is a state name** exactly as written in the contract's `given(...)`.
-  Spelling matters: `"user 1 exists"` must match character for character.
+- **Each key is a state name** exactly as written in the contract's `given(...)`{{}}.
+  Spelling matters: `"user 1 exists"`{{}} must match character for character.
 - **`users` is the test data** that UserService loads when the verifier asks for that
-  state. `"no users exist"` loads an empty list, so `GET /users/99` returns 404.
+  state. `"no users exist"`{{}} loads an empty list, so `GET /users/99`{{}} returns 404.
 - **The name differs from the contract's example**, and the verification still passes.
   That's the type matcher at work: the contract only requires *a string*.
 - **Watch the comma** between the two states. JSON doesn't allow a missing or trailing
@@ -95,9 +101,15 @@ contract:
 
 `verify-provider 2.0.0 order-service/pacts/OrderService-UserService.json`{{exec}}
 
-It fails: the response has no `name`{{}} field. That's step 1's bug, caught in seconds,
-without deploying anything and without running OrderService at all. The UserService team
-could run this in their CI on every commit.
+It fails. Look for this line in the output:
+
+    $ -> Actual map is missing the following keys: name
+
+The `$`{{}} means "the top level of the response body". UserService 2.0.0 returns
+`full_name`{{}}, but the contract requires `name`{{}}.
+
+That's step 1's bug, caught in seconds, without deploying anything and without running
+OrderService at all. The UserService team could run this in their CI on every commit.
 
 There's one catch. To run the verification, the provider needed the pact file from the
 *consumer's* repository. Copying files between teams doesn't scale, and it doesn't tell

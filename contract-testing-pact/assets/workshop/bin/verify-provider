@@ -30,6 +30,7 @@ done
 
 echo "Verifying UserService $VERSION against $(basename "$PACT_FILE")"
 docker run --rm --network workshop -v "$PACT_FILE":/pact.json:ro \
+  -e PACT_DO_NOT_TRACK=true \
   pactfoundation/pact-ref-verifier:latest \
   --file /pact.json \
   --hostname "$NAME" --port 5000 \
