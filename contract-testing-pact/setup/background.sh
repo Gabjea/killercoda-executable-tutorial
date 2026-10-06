@@ -16,6 +16,15 @@ cp -r "$ASSETS/workshop/." "$W/"
 install -m 0755 "$W"/bin/* /usr/local/bin/
 echo 'cd /root/workshop' >> /root/.bashrc
 
+echo "== Installing Docker Compose plugin"
+if ! docker compose version >/dev/null 2>&1; then
+  mkdir -p /usr/local/lib/docker/cli-plugins
+  curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m)" \
+    -o /usr/local/lib/docker/cli-plugins/docker-compose
+  chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+fi
+docker compose version
+
 echo "== Pulling images (in parallel)"
 pids=()
 for img in postgres:16-alpine pactfoundation/pact-broker:latest pactfoundation/pact-cli:latest; do
