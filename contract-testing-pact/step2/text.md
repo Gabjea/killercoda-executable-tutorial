@@ -35,36 +35,40 @@ the fields it needs.
 
 ## Your task
 
-Complete `test_get_existing_user`:
+You'll **read** one file and **edit** another:
 
-1. Replace the empty body with the fields UserClient reads. Check `order-service/user_client.py`
-   to see which ones those are.
-2. Use **matchers** for the values: `match.int(1)` means "any integer, for example 1",
-   and `match.str("Alice Andersson")` means "any string, for example Alice Andersson".
-3. Assert that the returned `user` has the expected `id` and `name`.
+- `order-service/user_client.py` is the code being tested. Don't change it.
+- `order-service/tests/test_user_client_pact.py` is the test you complete.
 
-Run the tests again until both pass:
-
-`run-tests order-service`{{exec}}
+**1. Find out what OrderService needs.** Open `order-service/user_client.py` and find
+where it reads UserService's response. Which fields does it use? Those fields, and
+nothing else, belong in the contract.
 
 <details>
-<summary>Show solution</summary>
+<summary>Hint</summary>
+
+Look at the last line of `get_user`:
 
 ```python
-        .with_body(
-            {"id": match.int(1), "name": match.str("Alice Andersson")},
-            content_type="application/json",
-        )
-    )
-
-    with pact.serve() as srv:
-        user = UserClient(str(srv.url)).get_user(1)
-
-    assert user.id == 1
-    assert user.name == "Alice Andersson"
+return User(id=data["id"], name=data["name"])
 ```
 
+OrderService reads `id` and `name`. It never touches `email`.
+
 </details>
+
+**2. Describe the response body.** In `test_get_existing_user`, replace `{}` in the
+`.with_body(...)` line with those fields. For the values, use **matchers**:
+`match.int(1)` means "any integer, for example 1", and `match.str("Alice Andersson")`
+means "any string, for example Alice Andersson".
+
+**3. Check the result.** At the end of the function, after the `with` block, assert that
+`user.id` and `user.name` have the example values. The mock server responds with those
+values, so the client should return them.
+
+Run the tests until both pass:
+
+`run-tests order-service`{{exec}}
 
 ## Look at the contract
 

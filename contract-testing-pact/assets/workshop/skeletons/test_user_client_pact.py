@@ -42,8 +42,11 @@ def test_get_existing_user(pact):
         .given("user 1 exists")
         .with_request("GET", "/users/1")
         .will_respond_with(200)
+        # TODO 1: replace {} with the fields UserClient reads, using match.int / match.str
         .with_body({}, content_type="application/json")
     )
 
     with pact.serve() as srv:
         user = UserClient(str(srv.url)).get_user(1)
+
+    # TODO 2: assert that user.id and user.name have the example values
